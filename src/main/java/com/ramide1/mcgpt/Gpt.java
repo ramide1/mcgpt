@@ -40,11 +40,12 @@ public class Gpt implements CommandExecutor {
                     messages = getHistory(sender) + "," + messages;
                 }
                 String newHistory = messages;
-                if (!instructions.isEmpty()) {     
+                if (!instructions.isEmpty()) {
                     messages = "{\"role\": \"system\",\"content\": \"" + instructions + "\"}" + "," + messages;
                 }
                 messages = "[" + messages + "]";
-                String data = !model.isEmpty() ? "{\"model\": \"" + model + "\", \"messages\": " + messages + "}" : "{\"messages\": " + messages + "}";
+                String data = !model.isEmpty() ? "{\"model\": \"" + model + "\", \"messages\": " + messages + "}"
+                        : "{\"messages\": " + messages + "}";
                 OutputStream os = connection.getOutputStream();
                 byte[] postData = data.getBytes("utf-8");
                 os.write(postData, 0, postData.length);
@@ -62,6 +63,7 @@ public class Gpt implements CommandExecutor {
                     Matcher matcher = pattern.matcher(response.toString());
                     if (matcher.find()) {
                         content = matcher.group(1);
+                        content = content.replace("\n", " ");
                         newHistory = newHistory + "," + "{\"role\": \"assistant\",\"content\": \"" + content + "\"}";
                         saveHistory(sender, newHistory);
                     }
@@ -77,16 +79,21 @@ public class Gpt implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command gpt, String label, String[] args) {
         String url = plugin.getConfig().getString("Config.url", "");
         String instructions = plugin.getConfig().getString("Config.instructions", "");
-        String apiKey = plugin.getConfig().getString("Config.apikey", "");
+        String apikey = plugin.getConfig().getString("Config.apikey", "");
         String model = plugin.getConfig().getString("Config.model", "");
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length >= 1) {
+                StringBuilder question = new StringBuilder();
+                for (String arg : args) {
+                    question.append(arg).append(" ");
+                }
+                question.deleteCharAt(question.length() - 1);
                 new BukkitRunnable() {
                     @Override
                     public void run() {
                         String response = sendRequestToGPTApi(url, instructions, player.getName(),
-                                String.join(" ", args), apiKey,
+                                question.toString(), apikey,
                                 model);
                         Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(response));
                     }
@@ -96,12 +103,17 @@ public class Gpt implements CommandExecutor {
             }
         } else {
             if (args.length >= 1) {
+                StringBuilder question = new StringBuilder();
+                for (String arg : args) {
+                    question.append(arg).append(" ");
+                }
+                question.deleteCharAt(question.length() - 1);
                 new BukkitRunnable() {
                     @Override
                     public void run() {
                         String response = sendRequestToGPTApi(url, instructions, "console",
-                                String.join(" ", args),
-                                apiKey,
+                                question.toString(),
+                                apikey,
                                 model);
                         Bukkit.getScheduler().runTask(plugin, () -> plugin.getLogger().info(response));
                     }

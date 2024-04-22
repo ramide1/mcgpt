@@ -62,7 +62,7 @@ public class Gpt implements CommandExecutor {
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(response.toString());
                     if (matcher.find()) {
-                        content = matcher.group(1);
+                        content = (matcher.group(1)).replaceAll("\n", "");
                         newHistory = newHistory + "," + "{\"role\": \"assistant\",\"content\": \"" + content + "\"}";
                         saveHistory(sender, newHistory);
                     }

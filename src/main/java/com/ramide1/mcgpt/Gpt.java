@@ -22,7 +22,7 @@ public class Gpt implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    public String sendRequestToGPTApi(String url, String instructions, String sender, String question, String apikey,
+    private String sendRequestToGPTApi(String url, String instructions, String sender, String question, String apikey,
             String model) {
         String content = "Url is empty.";
         if (!url.isEmpty()) {
@@ -62,7 +62,7 @@ public class Gpt implements CommandExecutor {
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(response.toString());
                     if (matcher.find()) {
-                        content = matcher.group(1).replace("\\n", "\n");
+                        content = matcher.group(1).replace("\\n", "").replace("\\", "");
                         newHistory = newHistory + "," + "{\"role\": \"assistant\",\"content\": \"" + content + "\"}";
                         saveHistory(sender, newHistory);
                     }
@@ -124,7 +124,7 @@ public class Gpt implements CommandExecutor {
         return true;
     }
 
-    public boolean saveHistory(String sender, String history) {
+    private boolean saveHistory(String sender, String history) {
         plugin.dataConfig.set(sender, history);
         try {
             plugin.dataConfig.save(plugin.data);
@@ -134,7 +134,7 @@ public class Gpt implements CommandExecutor {
         return true;
     }
 
-    public String getHistory(String sender) {
+    private String getHistory(String sender) {
         return plugin.dataConfig.contains(sender) ? plugin.dataConfig.getString(sender) : "";
     }
 }

@@ -1,7 +1,7 @@
 main: com.ramide1.mcgpt.App
 name: mcgpt
 version: 1.0
-api-version: 1.20
+api-version: 1.21
 commands:
   gpt:
     description: Answer a question with gpt

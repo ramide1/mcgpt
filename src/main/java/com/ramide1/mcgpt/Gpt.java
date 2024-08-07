@@ -58,11 +58,11 @@ public class Gpt implements CommandExecutor {
                     while ((line = br.readLine()) != null) {
                         response.append(line);
                     }
-                    String regex = "\"content\":\"([^\"]+)\"";
+                    String regex = "\"content\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"";
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(response.toString());
                     if (matcher.find()) {
-                        content = matcher.group(1).replace("\\n", " ").replace("\\", " ");
+                        content = matcher.group(1).replace("\\n", "").replace("\\", "").replace("\"", "");
                         newHistory = newHistory + "," + "{\"role\": \"assistant\",\"content\": \"" + content + "\"}";
                         saveHistory(sender, newHistory);
                     }
